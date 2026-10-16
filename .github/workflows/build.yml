@@ -1,0 +1,32 @@
+name: Build Windows  
+  
+on:  
+  push:  
+  pull_request:  
+  workflow_dispatch:  
+  
+jobs:  
+  build:  
+    runs-on: windows-latest  
+  
+    steps:  
+      - name: 检出代码  
+        uses: actions/checkout@v4  
+  
+      - name: 安装 zlib  
+        run: vcpkg install zlib:x64-windows-static  
+  
+      - name: 配置 CMake  
+        run: cmake -S . -B build -A x64 -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows-static  
+  
+      - name: 编译 Release  
+        run: cmake --build build --config Release  
+  
+      - name: 安装到 dist 目录  
+        run: cmake --install build --config Release --prefix dist  
+  
+      - name: 上传编译产物  
+        uses: actions/upload-artifact@v4  
+        with:  
+          name: vgmtools-win64  
+          path: dist/bin/*.exe
